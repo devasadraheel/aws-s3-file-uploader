@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { S3Module } from './s3/s3.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { S3Module } from './s3/s3.module';
       envFilePath: '.env',
     }),
     S3Module,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
