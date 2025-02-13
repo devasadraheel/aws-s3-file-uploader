@@ -1,10 +1,11 @@
 import { IsString, IsNotEmpty, IsNumber, Min, Max, Matches } from 'class-validator';
+import { FILE_UPLOAD_CONFIG, ERROR_MESSAGES } from '../../config/file-upload.config';
 
 export class PresignUploadDto {
   @IsString()
   @IsNotEmpty()
-  @Matches(/^uploads\/[a-zA-Z0-9\-_]+\.\w+$/, {
-    message: 'Key must start with "uploads/" and contain only alphanumeric characters, hyphens, underscores, and a valid file extension',
+  @Matches(FILE_UPLOAD_CONFIG.KEY_PATTERN, {
+    message: ERROR_MESSAGES.INVALID_KEY_FORMAT,
   })
   key: string;
 
@@ -14,6 +15,6 @@ export class PresignUploadDto {
 
   @IsNumber()
   @Min(1)
-  @Max(10 * 1024 * 1024) // 10MB in bytes
+  @Max(FILE_UPLOAD_CONFIG.MAX_FILE_SIZE_BYTES)
   contentLength: number;
 }

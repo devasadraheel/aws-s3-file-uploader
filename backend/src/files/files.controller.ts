@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Body, Query, BadRequestException, Logger } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, BadRequestException, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { S3Service } from '../s3/s3.service';
 import { PresignUploadDto } from './dto/presign-upload.dto';
 import { PresignDownloadDto } from './dto/presign-download.dto';
+import { FILE_UPLOAD_CONFIG, ERROR_MESSAGES } from '../config/file-upload.config';
 
 @Controller('files')
 export class FilesController {
@@ -17,16 +18,21 @@ export class FilesController {
       // Additional validation
       this.validateFileUpload(key, contentType, contentLength);
       
-      const url = await this.s3Service.getPresignedPutUrl(key, contentType);
+      const url = await this.s3Service.getPresignedPutUrl(key, contentType, FILE_UPLOAD_CONFIG.PRESIGNED_URL_EXPIRY_SECONDS);
+      
+      this.logger.log(`Generated presigned upload URL for key: ${key}`);
       
       return {
         url,
         key,
-        expiresIn: 3600, // 1 hour
+        expiresIn: FILE_UPLOAD_CONFIG.PRESIGNED_URL_EXPIRY_SECONDS,
       };
     } catch (error) {
       this.logger.error('Failed to generate presigned upload URL', error);
-      throw new BadRequestException('Failed to generate upload URL');
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(ERROR_MESSAGES.UPLOAD_URL_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -35,15 +41,20 @@ export class FilesController {
     try {
       const { key } = presignDownloadDto;
       
-      const url = await this.s3Service.getPresignedGetUrl(key);
+      const url = await this.s3Service.getPresignedGetUrl(key, FILE_UPLOAD_CONFIG.PRESIGNED_URL_EXPIRY_SECONDS);
+      
+      this.logger.log(`Generated presigned download URL for key: ${key}`);
       
       return {
         url,
-        expiresIn: 3600, // 1 hour
+        expiresIn: FILE_UPLOAD_CONFIG.PRESIGNED_URL_EXPIRY_SECONDS,
       };
     } catch (error) {
       this.logger.error('Failed to generate presigned download URL', error);
-      throw new BadRequestException('Failed to generate download URL');
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(ERROR_MESSAGES.DOWNLOAD_URL_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -54,37 +65,34 @@ export class FilesController {
       
       const metadata = await this.s3Service.headObject(key);
       
+      this.logger.log(`Retrieved metadata for key: ${key}`);
+      
       return metadata;
     } catch (error) {
       this.logger.error('Failed to get file metadata', error);
-      throw new BadRequestException('Failed to get file metadata');
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(ERROR_MESSAGES.METADATA_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   private validateFileUpload(key: string, contentType: string, contentLength: number): void {
     // Check key prefix
-    if (!key.startsWith('uploads/')) {
-      throw new BadRequestException('Key must start with "uploads/"');
+    if (!key.startsWith(FILE_UPLOAD_CONFIG.KEY_PREFIX)) {
+      throw new BadRequestException(`Key must start with "${FILE_UPLOAD_CONFIG.KEY_PREFIX}"`);
     }
 
-    // Check file size (10MB limit)
-    const maxSizeBytes = 10 * 1024 * 1024; // 10MB
-    if (contentLength > maxSizeBytes) {
-      throw new BadRequestException(`File size exceeds maximum limit of ${maxSizeBytes / (1024 * 1024)}MB`);
+    // Check file size
+    if (contentLength > FILE_UPLOAD_CONFIG.MAX_FILE_SIZE_BYTES) {
+      throw new BadRequestException(
+        `${ERROR_MESSAGES.FILE_SIZE_EXCEEDED} of ${FILE_UPLOAD_CONFIG.MAX_FILE_SIZE_MB}MB`
+      );
     }
 
     // Check MIME type
-    const allowedMimeTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'application/pdf',
-      'text/plain',
-    ];
-    
-    if (!allowedMimeTypes.includes(contentType)) {
-      throw new BadRequestException(`File type ${contentType} is not allowed`);
+    if (!FILE_UPLOAD_CONFIG.ALLOWED_MIME_TYPES.includes(contentType)) {
+      throw new BadRequestException(`${ERROR_MESSAGES.INVALID_MIME_TYPE}: ${contentType}`);
     }
   }
 }
