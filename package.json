@@ -1,0 +1,22 @@
+{
+  "name": "aws-s3-file-uploader",
+  "version": "1.0.0",
+  "description": "A clean demo app showcasing practical AWS S3 integration with pre-signed URLs",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "backend:dev": "cd backend && npm run start:dev",
+    "frontend:dev": "cd frontend && npm run dev",
+    "backend:build": "cd backend && npm run build",
+    "frontend:build": "cd frontend && npm run build",
+    "backend:test": "cd backend && npm run test",
+    "frontend:test": "cd frontend && npm run test",
+    "backend:test:e2e": "cd backend && npm run test:e2e",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "lint": "npm run backend:lint && npm run frontend:lint",
+    "format": "npm run backend:format && npm run frontend:format"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

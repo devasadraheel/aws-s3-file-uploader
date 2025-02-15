@@ -61,18 +61,47 @@ Your AWS user/role needs these S3 permissions:
 
 ### Run Commands
 
+**Quick Start (Both apps):**
+```bash
+# Install all dependencies
+npm run install:all
+
+# Start both backend and frontend in development mode
+npm run dev
+```
+
+**Individual Commands:**
+
 **Backend (NestJS):**
 ```bash
 cd backend
-pnpm install
-pnpm run start:dev
+npm install
+npm run start:dev
 ```
 
 **Frontend (Next.js):**
 ```bash
 cd frontend
-pnpm install
-pnpm run dev
+npm install
+npm run dev
+```
+
+**Other Commands:**
+```bash
+# Build both apps
+npm run backend:build
+npm run frontend:build
+
+# Run tests
+npm run backend:test
+npm run frontend:test
+
+# Run e2e tests
+npm run backend:test:e2e
+
+# Lint and format
+npm run lint
+npm run format
 ```
 
 Visit `http://localhost:3000` to use the app.
