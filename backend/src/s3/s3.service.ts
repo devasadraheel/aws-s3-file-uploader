@@ -1,6 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
@@ -11,17 +16,23 @@ export class S3Service {
 
   constructor(private configService: ConfigService) {
     this.bucketName = this.configService.get<string>('AWS_S3_BUCKET');
-    
+
     this.s3Client = new S3Client({
       region: this.configService.get<string>('AWS_REGION'),
       credentials: {
         accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY'),
+        secretAccessKey: this.configService.get<string>(
+          'AWS_SECRET_ACCESS_KEY',
+        ),
       },
     });
   }
 
-  async getPresignedPutUrl(key: string, contentType: string, expiresIn: number = 3600): Promise<string> {
+  async getPresignedPutUrl(
+    key: string,
+    contentType: string,
+    expiresIn: number = 3600,
+  ): Promise<string> {
     try {
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
@@ -33,12 +44,18 @@ export class S3Service {
       this.logger.log(`Generated presigned PUT URL for key: ${key}`);
       return url;
     } catch (error) {
-      this.logger.error(`Failed to generate presigned PUT URL for key: ${key}`, error);
+      this.logger.error(
+        `Failed to generate presigned PUT URL for key: ${key}`,
+        error,
+      );
       throw error;
     }
   }
 
-  async getPresignedGetUrl(key: string, expiresIn: number = 3600): Promise<string> {
+  async getPresignedGetUrl(
+    key: string,
+    expiresIn: number = 3600,
+  ): Promise<string> {
     try {
       const command = new GetObjectCommand({
         Bucket: this.bucketName,
@@ -49,12 +66,20 @@ export class S3Service {
       this.logger.log(`Generated presigned GET URL for key: ${key}`);
       return url;
     } catch (error) {
-      this.logger.error(`Failed to generate presigned GET URL for key: ${key}`, error);
+      this.logger.error(
+        `Failed to generate presigned GET URL for key: ${key}`,
+        error,
+      );
       throw error;
     }
   }
 
-  async headObject(key: string): Promise<any> {
+  async headObject(key: string): Promise<{
+    contentLength: number;
+    contentType: string;
+    lastModified: Date;
+    etag: string;
+  }> {
     try {
       const command = new HeadObjectCommand({
         Bucket: this.bucketName,

@@ -1,5 +1,8 @@
 import { IsString, IsNotEmpty, Matches } from 'class-validator';
-import { FILE_UPLOAD_CONFIG, ERROR_MESSAGES } from '../../config/file-upload.config';
+import {
+  FILE_UPLOAD_CONFIG,
+  ERROR_MESSAGES,
+} from '../../config/file-upload.config';
 
 export class PresignDownloadDto {
   @IsString()

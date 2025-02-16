@@ -15,7 +15,8 @@ export const FILE_UPLOAD_CONFIG = {
 } as const;
 
 export const ERROR_MESSAGES = {
-  INVALID_KEY_FORMAT: 'Key must start with "uploads/" and contain only alphanumeric characters, hyphens, underscores, and a valid file extension',
+  INVALID_KEY_FORMAT:
+    'Key must start with "uploads/" and contain only alphanumeric characters, hyphens, underscores, and a valid file extension',
   FILE_SIZE_EXCEEDED: 'File size exceeds maximum limit',
   INVALID_MIME_TYPE: 'File type is not allowed',
   UPLOAD_URL_FAILED: 'Failed to generate upload URL',

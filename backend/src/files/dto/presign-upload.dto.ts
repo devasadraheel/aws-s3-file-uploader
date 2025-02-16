@@ -1,5 +1,15 @@
-import { IsString, IsNotEmpty, IsNumber, Min, Max, Matches } from 'class-validator';
-import { FILE_UPLOAD_CONFIG, ERROR_MESSAGES } from '../../config/file-upload.config';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  Min,
+  Max,
+  Matches,
+} from 'class-validator';
+import {
+  FILE_UPLOAD_CONFIG,
+  ERROR_MESSAGES,
+} from '../../config/file-upload.config';
 
 export class PresignUploadDto {
   @IsString()
