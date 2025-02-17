@@ -15,15 +15,17 @@ export class S3Service {
   private readonly bucketName: string;
 
   constructor(private configService: ConfigService) {
-    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET');
+    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET') || 'default-bucket';
+
+    const region = this.configService.get<string>('AWS_REGION') || 'us-east-1';
+    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID') || 'dummy-key';
+    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || 'dummy-secret';
 
     this.s3Client = new S3Client({
-      region: this.configService.get<string>('AWS_REGION'),
+      region,
       credentials: {
-        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.get<string>(
-          'AWS_SECRET_ACCESS_KEY',
-        ),
+        accessKeyId,
+        secretAccessKey,
       },
     });
   }
@@ -89,10 +91,10 @@ export class S3Service {
       const response = await this.s3Client.send(command);
       this.logger.log(`Retrieved object metadata for key: ${key}`);
       return {
-        contentLength: response.ContentLength,
-        contentType: response.ContentType,
-        lastModified: response.LastModified,
-        etag: response.ETag,
+        contentLength: response.ContentLength || 0,
+        contentType: response.ContentType || 'application/octet-stream',
+        lastModified: response.LastModified || new Date(),
+        etag: response.ETag || '',
       };
     } catch (error) {
       this.logger.error(`Failed to get object metadata for key: ${key}`, error);

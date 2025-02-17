@@ -126,7 +126,7 @@ export class FilesController {
     }
 
     // Check MIME type
-    if (!FILE_UPLOAD_CONFIG.ALLOWED_MIME_TYPES.includes(contentType)) {
+    if (!FILE_UPLOAD_CONFIG.ALLOWED_MIME_TYPES.includes(contentType as any)) {
       throw new BadRequestException(
         `${ERROR_MESSAGES.INVALID_MIME_TYPE}: ${contentType}`,
       );
