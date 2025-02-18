@@ -21,7 +21,23 @@ A clean demo app showcasing practical AWS S3 integration with pre-signed URLs.
 
 ### Environment Setup
 
-Create `.env` files in both `backend/` and `frontend/` directories:
+Copy the example environment files and configure them:
+
+**Backend:**
+```bash
+cd backend
+cp .env.example .env
+# Edit .env with your AWS credentials and S3 bucket name
+```
+
+**Frontend:**
+```bash
+cd frontend
+cp .env.example .env.local
+# Edit .env.local if you need to change the API URL
+```
+
+**Environment Variables:**
 
 **backend/.env:**
 ```env
